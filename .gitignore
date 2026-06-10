@@ -1,0 +1,22 @@
+# Env files — NEVER commit
+.env
+token_server/.env
+
+# Flutter
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/pubspec.lock
+**/.packages
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+
+# Node
+token_server/node_modules/

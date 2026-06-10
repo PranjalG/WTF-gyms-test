@@ -1,0 +1,60 @@
+name: trainer_app
+description: WTF Gyms — Trainer App for Aarav
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+
+  # Navigation
+  go_router: ^13.2.0
+
+  # Local storage
+  hive_flutter: ^1.1.0
+
+  # 100ms RTC SDK
+  hmssdk_flutter: ^1.9.9
+
+  # Code generation helpers
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+
+  # UI & utilities
+  intl: ^0.19.0
+  timeago: ^3.6.0
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.9
+  shimmer: ^3.0.0
+
+  # HTTP
+  dio: ^5.4.1
+
+  # Environment
+  flutter_dotenv: ^5.1.0
+
+  cupertino_icons: ^1.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  freezed: ^2.4.7
+  json_serializable: ^6.7.1
+  riverpod_generator: ^2.3.9
+  hive_generator: ^2.0.1
+  mockito: ^5.4.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - .env
