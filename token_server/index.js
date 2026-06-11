@@ -71,5 +71,5 @@ app.listen(PORT, () => {
   console.log(`✅ WTF Token Server running on http://localhost:${PORT}`);
   console.log(`   GET /token?userId=DK&role=member`);
   console.log(`   GET /token?userId=Aarav&role=trainer`);
-  console.log(`   GET /health`);
+//  console.log(`   GET /health`);
 });
