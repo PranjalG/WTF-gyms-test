@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow access to camera for trainer video calls</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow access to microphone for trainer video calls</string>
 </dict>
 </plist>

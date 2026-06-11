@@ -126,6 +126,7 @@ final requestCallProvider = FutureProvider.family<void, (String trainerId, DateT
     scheduledFor: scheduledFor,
     note: note,
     status: 'pending',
+    roomCode : 'lif-nsqz-pye'
   );
 
   try {
@@ -149,6 +150,7 @@ final requestCallProvider = FutureProvider.family<void, (String trainerId, DateT
 
 final respondToCallRequestProvider = FutureProvider.family<void, (String requestId, String status)>((ref, params) async {
   final (requestId, status) = params;
+  const fallbackRoomCode = 'lif-nsqz-pye';
 
   try {
     // Write locally to Hive
@@ -157,15 +159,18 @@ final respondToCallRequestProvider = FutureProvider.family<void, (String request
 
     if (requestData != null && requestData is Map) {
       final request = CallRequestModel.fromMap(Map<String, dynamic>.from(requestData));
-      request.status = status; // 'approved' or 'declined'
+      request.status = status;
+      if (status == 'approved') {
+        request.roomCode = fallbackRoomCode;
+      }
       await requestsBox.put(requestId, request.toMap());
     }
 
     // Sync the status update to Firestore
-    await FirebaseFirestore.instance
-        .collection('callRequests')
-        .doc(requestId)
-        .update({'status': status});
+    await FirebaseFirestore.instance.collection('callRequests').doc(requestId).update({
+      'status': status,
+      if (status == 'approved') 'roomCode': fallbackRoomCode,
+    });
   } catch (e) {
     // print('[CALL_SCHEDULE] Error responding to call request: $e');
   }

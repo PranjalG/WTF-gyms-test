@@ -8,6 +8,9 @@ import '../../features/chat/chat_list_screen.dart';
 import '../../features/chat/conversation_screen.dart';
 import '../../features/schedule/pending_requests_screen.dart';
 import '../../features/schedule/scheduled_calls_screen.dart';
+import '../../features/calls/prejoin_screen.dart';
+import '../../features/calls/in_call_screen.dart';
+import '../../models/call_request_model.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final isLoggedIn = ref.watch(isLoggedInProvider);
@@ -44,11 +47,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/call/prejoin',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Pre-Join Check'),
+        builder: (context, state) {
+          final call = state.extra;
+          if (call is! CallRequestModel) {
+            return const _PlaceholderScreen(title: 'Missing call request');
+          }
+          return PreJoinScreen(call: call);
+        },
       ),
       GoRoute(
         path: '/call/room',
-        builder: (context, state) => const _PlaceholderScreen(title: 'In Call'),
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is! Map<String, dynamic> || extra['call'] is! CallRequestModel) {
+            return const _PlaceholderScreen(title: 'Missing call session');
+          }
+          return InCallScreen(
+            call: extra['call'] as CallRequestModel,
+            token: extra['token'] as String,
+            userName: extra['userName'] as String,
+            micOn: extra['micOn'] as bool,
+            cameraOn: extra['cameraOn'] as bool,
+          );
+        },
       ),
     ],
   );

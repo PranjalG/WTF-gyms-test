@@ -34,6 +34,7 @@ dependencies:
   flutter_svg: ^2.0.9
   shimmer: ^3.0.0
   image_picker: ^1.0.7
+  permission_handler: ^11.3.1
 
   # HTTP
   dio: ^5.4.1

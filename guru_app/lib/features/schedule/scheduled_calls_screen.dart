@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../core/di/auth_provider.dart';
 import '../../core/di/schedule_provider.dart';
@@ -156,12 +157,7 @@ class ScheduledCallsScreen extends ConsumerWidget {
                               backgroundColor: AppTheme.primary,
                             ),
                             onPressed: () {
-                              // In Phase 5, this will navigate to /call/pre join
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Jump to call feature coming in Phase 5'),
-                                ),
-                              );
+                              context.push('/call/prejoin', extra: call);
                             },
                             child: const Text(
                               'Join Call',
