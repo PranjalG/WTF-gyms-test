@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:guru_app/services/seed_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/theme/app_theme.dart';
@@ -15,6 +15,7 @@ void main() async {
 
   // Init Hive
   await HiveInit.init();
+  SeedService.seedIfEmpty();
 
   runApp(
     const ProviderScope(

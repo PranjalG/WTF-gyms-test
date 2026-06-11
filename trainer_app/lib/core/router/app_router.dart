@@ -1,43 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-final _isLoggedIn = false;
+import '../di/auth_provider.dart';
+import '../../features/auth/login_screen.dart';
+import '../../features/home/home_screen.dart';
+import '../../features/chat/chat_list_screen.dart';
+import '../../features/chat/conversation_screen.dart';
+import '../../features/schedule/pending_requests_screen.dart';
+import '../../features/schedule/scheduled_calls_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final isLoggedIn = ref.watch(isLoggedInProvider);
+
   return GoRouter(
-    initialLocation: _isLoggedIn ? '/home' : '/login',
+    initialLocation: isLoggedIn ? '/home' : '/login',
     debugLogDiagnostics: true,
     routes: [
       GoRoute(
         path: '/login',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Login — Aarav'),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Home — Aarav'),
-      ),
-      GoRoute(
-        path: '/members',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Members (CRM)'),
-      ),
-      GoRoute(
-        path: '/chat',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Chats'),
-      ),
-      GoRoute(
-        path: '/chat/:chatId',
-        builder: (context, state) => _PlaceholderScreen(
-          title: 'Chat: ${state.pathParameters['chatId']}',
-        ),
+        builder: (context, state) => const HomeScreen(),
       ),
       GoRoute(
         path: '/requests',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Call Requests'),
+        builder: (context, state) => const PendingRequestsScreen(),
+      ),
+      GoRoute(
+        path: '/chat',
+        builder: (context, state) => const ChatListScreen(),
+      ),
+      GoRoute(
+        path: '/chat/:chatId',
+        builder: (context, state) => ConversationScreen(
+          chatPartnerId: state.pathParameters['chatId'] ?? 'dk_001',
+        ),
       ),
       GoRoute(
         path: '/sessions',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Sessions'),
+        builder: (context, state) => const ScheduledCallsScreen(),
       ),
       GoRoute(
         path: '/call/prejoin',
@@ -51,6 +54,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
+/// Placeholder screen — replace with real screens in Phase 3+
 class _PlaceholderScreen extends StatelessWidget {
   final String title;
   const _PlaceholderScreen({required this.title});

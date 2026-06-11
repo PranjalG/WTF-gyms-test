@@ -13,12 +13,12 @@ class UserModel {
     this.assignedTrainerId,
   });
 
-  Map<String, dynamic> toMap() => {
+  Map<dynamic, dynamic> toMap() => {
     'id': id, 'name': name, 'role': role,
     'avatarUrl': avatarUrl, 'assignedTrainerId': assignedTrainerId,
   };
 
-  factory UserModel.fromMap(Map<String, dynamic> m) => UserModel(
+  factory UserModel.fromMap(Map<dynamic, dynamic> m) => UserModel(
     id: m['id'], name: m['name'], role: m['role'],
     avatarUrl: m['avatarUrl'], assignedTrainerId: m['assignedTrainerId'],
   );

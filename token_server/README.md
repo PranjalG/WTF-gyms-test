@@ -6,7 +6,7 @@ Minimal Node.js server that generates signed 100ms JWT auth tokens.
 
 ```bash
 npm install
-cp .env.example .env
+cp .env .env
 # Edit .env and paste your 100ms credentials
 node index.js
 ```

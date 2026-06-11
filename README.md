@@ -8,7 +8,7 @@
 ### 1. Token Server
 ```bash
 cd token_server
-cp .env.example .env        # fill in your 100ms credentials
+cp .env .env        # fill in your 100ms credentials
 npm install
 node index.js               # runs on http://localhost:3000
 ```
@@ -88,8 +88,8 @@ Never commit your `.env` file — it is in `.gitignore`.
 
 ## 👤 Test Personas
 
-| Role    | Name  | Pre-seeded |
-|---------|-------|------------|
-| Member  | DK    | ✅ Guru App |
+| Role    | Name  | Pre-seeded    |
+|---------|-------|---------------|
+| Member  | DK    | ✅ Guru App    |
 | Trainer | Aarav | ✅ Trainer App |
 # WTF-gyms-test
