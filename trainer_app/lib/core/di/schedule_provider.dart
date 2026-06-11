@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:trainer_app/models/call_request_model.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth_provider.dart';
 
 const uuid = Uuid();
@@ -40,48 +41,6 @@ final scheduledCallsProvider = StreamProvider.family<List<CallRequestModel>, Str
   });
 });
 
-/// Request a call
-final requestCallProvider = FutureProvider.family<void, (String trainerId, DateTime scheduledFor, String note)>((ref, params) async {
-  final (trainerId, scheduledFor, note) = params;
-  final currentUser = ref.watch(currentUserProvider);
-  
-  if (currentUser == null) return;
-  
-  final callRequest = CallRequestModel(
-    id: uuid.v4(),
-    memberId: currentUser.id,
-    trainerId: trainerId,
-    requestedAt: DateTime.now(),
-    scheduledFor: scheduledFor,
-    note: note,
-  );
-  
-  try {
-    final requestsBox = Hive.box('callRequests');
-    await requestsBox.put(callRequest.id, callRequest.toMap());
-  } catch (e) {
-    // print('[CALL_SCHEDULE] Error requesting call: $e');
-  }
-});
-
-/// Approve or decline a call request
-final respondToCallRequestProvider = FutureProvider.family<void, (String requestId, String status)>((ref, params) async {
-  final (requestId, status) = params;
-  
-  try {
-    final requestsBox = Hive.box('callRequests');
-    final requestData = requestsBox.get(requestId);
-    
-    if (requestData != null && requestData is Map) {
-      final request = CallRequestModel.fromMap(Map<String, dynamic>.from(requestData));
-      request.status = status; // 'approved' or 'declined'
-      await requestsBox.put(requestId, request.toMap());
-    }
-  } catch (e) {
-    // print('[CALL_SCHEDULE] Error responding to call request: $e');
-  }
-});
-
 /// Unread pending request count
 final pendingRequestCountProvider = StreamProvider.family<int, String>((ref, trainerId) {
   final requestsBox = Hive.box('callRequests');
@@ -95,4 +54,119 @@ final pendingRequestCountProvider = StreamProvider.family<int, String>((ref, tra
     
     return pendingCount;
   });
+});
+
+/// Provider to initialize remote Firestore listener for call requests
+final syncCallRequestsProvider = StreamProvider.family<void, String>((ref, userId) {
+  final firestore = FirebaseFirestore.instance;
+  final requestsBox = Hive.box('callRequests');
+
+  // Listen for call requests where the current user is the member
+  final memberSub = firestore
+      .collection('callRequests')
+      .where('memberId', isEqualTo: userId)
+      .snapshots()
+      .listen((snapshot) {
+    for (var change in snapshot.docChanges) {
+      final data = change.doc.data();
+      if (data != null) {
+        final Map<String, dynamic> requestMap = Map<String, dynamic>.from(data);
+        // Convert Firestore Timestamps back to ISO Strings for Hive compatibility
+        if (data['requestedAt'] is Timestamp) {
+          requestMap['requestedAt'] = (data['requestedAt'] as Timestamp).toDate().toIso8601String();
+        }
+        if (data['scheduledFor'] is Timestamp) {
+          requestMap['scheduledFor'] = (data['scheduledFor'] as Timestamp).toDate().toIso8601String();
+        }
+        requestsBox.put(data['id'], requestMap);
+      }
+    }
+  });
+
+  // Listen for call requests where the current user is the trainer
+  final trainerSub = firestore
+      .collection('callRequests')
+      .where('trainerId', isEqualTo: userId)
+      .snapshots()
+      .listen((snapshot) {
+    for (var change in snapshot.docChanges) {
+      final data = change.doc.data();
+      if (data != null) {
+        final Map<String, dynamic> requestMap = Map<String, dynamic>.from(data);
+        if (data['requestedAt'] is Timestamp) {
+          requestMap['requestedAt'] = (data['requestedAt'] as Timestamp).toDate().toIso8601String();
+        }
+        if (data['scheduledFor'] is Timestamp) {
+          requestMap['scheduledFor'] = (data['scheduledFor'] as Timestamp).toDate().toIso8601String();
+        }
+        requestsBox.put(data['id'], requestMap);
+      }
+    }
+  });
+
+  ref.onDispose(() {
+    memberSub.cancel();
+    trainerSub.cancel();
+  });
+
+  return const Stream.empty();
+});
+
+final requestCallProvider = FutureProvider.family<void, (String trainerId, DateTime scheduledFor, String note)>((ref, params) async {
+  final (trainerId, scheduledFor, note) = params;
+  final currentUser = ref.watch(currentUserProvider);
+
+  if (currentUser == null) return;
+
+  final callRequest = CallRequestModel(
+    id: uuid.v4(),
+    memberId: currentUser.id,
+    trainerId: trainerId,
+    requestedAt: DateTime.now(),
+    scheduledFor: scheduledFor,
+    note: note,
+    status: 'pending',
+  );
+
+  try {
+    // Write locally to Hive
+    final requestsBox = Hive.box('callRequests');
+    await requestsBox.put(callRequest.id, callRequest.toMap());
+
+    // Sync to Firestore
+    await FirebaseFirestore.instance
+        .collection('callRequests')
+        .doc(callRequest.id)
+        .set({
+      ...callRequest.toMap(),
+      'requestedAt': Timestamp.fromDate(callRequest.requestedAt), // Store as Timestamp
+      'scheduledFor': Timestamp.fromDate(callRequest.scheduledFor), // Store as Timestamp
+    });
+  } catch (e) {
+    // print('[CALL_SCHEDULE] Error requesting call: $e');
+  }
+});
+
+final respondToCallRequestProvider = FutureProvider.family<void, (String requestId, String status)>((ref, params) async {
+  final (requestId, status) = params;
+
+  try {
+    // Write locally to Hive
+    final requestsBox = Hive.box('callRequests');
+    final requestData = requestsBox.get(requestId);
+
+    if (requestData != null && requestData is Map) {
+      final request = CallRequestModel.fromMap(Map<String, dynamic>.from(requestData));
+      request.status = status; // 'approved' or 'declined'
+      await requestsBox.put(requestId, request.toMap());
+    }
+
+    // Sync the status update to Firestore
+    await FirebaseFirestore.instance
+        .collection('callRequests')
+        .doc(requestId)
+        .update({'status': status});
+  } catch (e) {
+    // print('[CALL_SCHEDULE] Error responding to call request: $e');
+  }
 });

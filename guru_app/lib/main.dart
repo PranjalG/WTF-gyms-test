@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:guru_app/services/seed_service.dart';
@@ -9,6 +10,9 @@ import 'core/di/hive_init.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 1. Initialize Firebase
+  await Firebase.initializeApp();
 
   // Load env vars
   await dotenv.load(fileName: '.env');

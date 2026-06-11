@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/di/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/di/schedule_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -16,6 +17,8 @@ class HomeScreen extends ConsumerWidget {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    ref.watch(syncCallRequestsProvider(currentUser.id));
 
     return Scaffold(
       appBar: AppBar(

@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/message_model.dart';
 import '../di/auth_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 const uuid = Uuid();
 
@@ -46,10 +47,10 @@ final chatIdProvider = Provider.family<String, String>((ref, otherUserId) {
 final sendMessageProvider = FutureProvider.family<void, String>((ref, messageText) async {
   final currentUser = ref.watch(currentUserProvider);
   if (currentUser == null || messageText.trim().isEmpty) return;
-  
+
   final chatPartner = ref.watch(chatPartnerProvider(currentUser.id));
   final chatId = ref.watch(chatIdProvider(chatPartner));
-  
+
   final message = MessageModel(
     id: uuid.v4(),
     chatId: chatId,
@@ -59,12 +60,24 @@ final sendMessageProvider = FutureProvider.family<void, String>((ref, messageTex
     createdAt: DateTime.now(),
     status: 'sent',
   );
-  
+
   try {
+    // 1. Optimistic write to local cache (Hive)
     final messagesBox = Hive.box('messages');
     await messagesBox.put(message.id, message.toMap());
+
+    // 2. Sync write to remote server (Firestore)
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .doc(message.id)
+        .set({
+      ...message.toMap(),
+      'createdAt': Timestamp.fromDate(message.createdAt), // Store as Firestore Timestamp
+    });
   } catch (e) {
-    print('[CHAT] Error sending message: $e');
+    // print('[CHAT] Error sending message: $e');
   }
 });
 
@@ -113,4 +126,39 @@ final unreadCountProvider = Provider.family<int, String>((ref, chatId) {
       .length;
   
   return unreadMessages;
+});
+
+/// Provider to initialize remote Firestore listener for a specific chat
+final syncFirestoreProvider = StreamProvider.family<void, String>((ref, chatId) {
+  final firestore = FirebaseFirestore.instance;
+  final messagesBox = Hive.box('messages');
+  // Listen to remote Firestore messages collection
+  final subscription = firestore
+      .collection('chats')
+      .doc(chatId)
+      .collection('messages')
+      .snapshots()
+      .listen((snapshot) {
+    for (var change in snapshot.docChanges) {
+      if (change.type == DocumentChangeType.added || change.type == DocumentChangeType.modified) {
+        final data = change.doc.data();
+        if (data != null) {
+          // Convert Firestore Timestamp back to ISO String for local Hive compatibility
+          final Map<String, dynamic> messageMap = Map<String, dynamic>.from(data);
+          if (data['createdAt'] is Timestamp) {
+            messageMap['createdAt'] = (data['createdAt'] as Timestamp).toDate().toIso8601String();
+          }
+
+          // Write directly to local Hive.
+          // The local messagesProvider stream listens to Hive and will update the UI automatically.
+          messagesBox.put(data['id'], messageMap);
+        }
+      }
+    }
+  });
+  ref.onDispose(() {
+    subscription.cancel();
+  });
+
+  return const Stream.empty();
 });

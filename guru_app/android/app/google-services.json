@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "936319949987",
+    "project_id": "wtf-gyms-c8cf0",
+    "storage_bucket": "wtf-gyms-c8cf0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936319949987:android:e7f18157ccc6737fe23316",
+        "android_client_info": {
+          "package_name": "com.wtfgyms.guru_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpU5AUU9PnxcM1TVCQq78j7C_CA97s_-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

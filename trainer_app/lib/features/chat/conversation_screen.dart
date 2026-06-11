@@ -56,6 +56,10 @@ class _ConversationScreenState extends ConsumerState<ConversationScreen> {
     }
 
     final chatId = ref.watch(chatIdProvider(widget.chatPartnerId));
+
+    // Watch the Firestore sync provider to start background synchronization for this chat
+    ref.watch(syncFirestoreProvider(chatId));
+
     final messagesAsync = ref.watch(messagesProvider(chatId));
     final isTyping = ref.watch(typingIndicatorProvider);
 
