@@ -119,7 +119,7 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ WTF Token Server running on http://localhost:${PORT}`);
   console.log(`   GET /token?userId=DK&role=guest`);
   console.log(`   GET /token?userId=Aarav&role=host`);

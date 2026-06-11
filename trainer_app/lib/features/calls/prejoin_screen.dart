@@ -38,8 +38,7 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider);
-    final formatted =
-        DateFormat('MMM dd, hh:mm a').format(widget.call.scheduledFor);
+    final formatted = DateFormat('MMM dd, hh:mm a').format(widget.call.scheduledFor);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ready to join?')),
@@ -49,11 +48,9 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Check mic and camera.',
-                  style: Theme.of(context).textTheme.headlineMedium),
+              Text('Check mic and camera.', style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 8),
-              Text('Session with Aarav at $formatted',
-                  style: Theme.of(context).textTheme.bodyMedium),
+              Text('Session with DK at $formatted', style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 24),
               Expanded(
                 child: Container(
@@ -69,18 +66,13 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
                         radius: 42,
                         backgroundColor: AppTheme.primary,
                         child: Text(
-                          currentUser?.name.substring(0, 1) ?? 'D',
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold),
+                          currentUser?.name.substring(0, 1) ?? 'A',
+                          style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _cameraOn
-                            ? 'Camera will start after joining'
-                            : 'Camera off',
+                        _cameraOn ? 'Camera will start after joining' : 'Camera off',
                         style: const TextStyle(color: Colors.white),
                       ),
                     ],
@@ -120,8 +112,7 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
                     : const Icon(Icons.video_call),
                 label: Text(_isJoining ? 'Joining...' : 'Join Call'),
@@ -143,16 +134,14 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
     });
 
     try {
-      final tokenServerUrl =
-          dotenv.env['TOKEN_SERVER_URL'] ?? 'http://localhost:3000';
+      final tokenServerUrl = dotenv.env['TOKEN_SERVER_URL'] ?? 'http://localhost:3000';
       final role = currentUser.role == 'trainer' ? 'host' : 'guest';
       final response = await Dio().get(
         '$tokenServerUrl/token',
         queryParameters: {
           'userId': currentUser.id,
           'role': role,
-          if (widget.call.roomCode != null && widget.call.roomCode!.isNotEmpty)
-            'roomId': widget.call.roomCode,
+          if (widget.call.roomCode != null && widget.call.roomCode!.isNotEmpty) 'roomId': widget.call.roomCode,
         },
       );
       print('ROOM ID = ${widget.call.roomCode}');
@@ -168,17 +157,8 @@ class _PreJoinScreenState extends ConsumerState<PreJoinScreen> {
         'micOn': _micOn,
         'cameraOn': _cameraOn,
       });
-    } catch (e) {
-      print('ERROR TYPE = ${e.runtimeType}');
-      print('ERROR = $e');
-
-      if (e is DioException) {
-        print('STATUS = ${e.response?.statusCode}');
-        print('DATA = ${e.response?.data}');
-      }
-
-      setState(() => _error = e.toString());
-      setState(() => _error = 'Could not join call: $e');
+    } catch (error) {
+      setState(() => _error = 'Could not join call: $error');
     } finally {
       if (mounted) setState(() => _isJoining = false);
     }

@@ -20,6 +20,7 @@ class HomeScreen extends ConsumerWidget {
 
     ref.watch(syncCallRequestsProvider(currentUser.id));
 
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Trainer Dashboard'),
