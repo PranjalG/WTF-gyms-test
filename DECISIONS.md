@@ -9,7 +9,7 @@
 **Rationale:**
 - Compile-safe providers — no string keys, no context dependency for reading state
 - `AsyncNotifierProvider` handles loading/error/data states cleanly for chat and call flows
-- Better testability than BLoC for a 6-hour assessment (less boilerplate)
+- Better testability than BLoC for a timed assessment (less boilerplate)
 - Code generation via `riverpod_generator` reduces manual provider wiring
 - Team at WTF likely familiar with Riverpod given modern Flutter stack
 
