@@ -19,10 +19,10 @@ with 100ms SDK handling real-time video calls and a local Node.js token server.
          └──────────┬────────────────┘
                     │
          ┌──────────▼──────────┐
-         │   Token Server       │
-         │   Node.js :3000      │
-         │   GET /token         │
-         │   (100ms JWT)        │
+         │   Token Server        │
+         │   Hosted on Render     │
+         │   GET /token            │
+         │   (100ms JWT)           │
          └──────────┬──────────┘
                     │
          ┌──────────▼──────────┐
@@ -30,6 +30,10 @@ with 100ms SDK handling real-time video calls and a local Node.js token server.
          │   (Video/Audio RTC)  │
          └─────────────────────┘
 ```
+
+> **Note:** The token server is deployed to Render (public HTTPS) rather than
+> run locally, to support testing across two physical devices (Android +
+> iPhone) on a shared hotspot. See ADR #4 in `DECISIONS.md`.
 
 ## Layer Structure (each app)
 
