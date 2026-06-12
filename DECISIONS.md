@@ -67,3 +67,33 @@ App → HMSSDK.join(HMSConfig(authToken: token, userName: userId))
 - Token expiry: refresh by re-calling token server before join
 - Network loss: `HMSUpdateListenerActions.onReconnecting` shows loader
 - App backgrounded: iOS/Android background audio handled by 100ms SDK natively
+
+---
+
+## ADR #4 — Token Server Hosting: Render (Public Deployment)
+
+**Decision:** Deploy `token_server/` to Render for a public HTTPS URL, instead
+of relying on local network IPs for multi-device testing.
+
+**Rationale:**
+- Testing was done across **two physical devices** (Android + iPhone) plus a
+  Mac, all connected via an iPhone personal hotspot
+- Hotspot networking on macOS did not reliably expose a usable local IP
+  (`en0`/`en1` returned self-assigned addresses), making `http://<local-ip>:3000`
+  unreachable from both devices
+- Deploying the token server to Render gave both apps a stable, public
+  `https://` endpoint that works regardless of network topology — closer to
+  a real production setup than localhost-based testing
+- Free tier is sufficient for this assessment's token-generation load
+
+**Trade-off:**
+- Cold starts on Render's free tier can add 1-2s latency on the first
+  `/token` request after inactivity — acceptable for this use case
+- `.env` credentials are configured as environment variables in the Render
+  dashboard rather than a local `.env` file in production
+
+**Alternatives considered:**
+- `ngrok` tunnel to localhost: works, but requires keeping a tunnel session
+  alive and regenerating URLs on restart
+- Local IP over shared WiFi: blocked by hotspot networking issues encountered
+  during testing (documented above)
